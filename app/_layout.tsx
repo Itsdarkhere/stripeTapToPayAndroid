@@ -3,7 +3,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { requestNeededAndroidPermissions } from '@stripe/stripe-terminal-react-native';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -21,6 +21,31 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  useEffect(() => {
+    async function init() {
+      try {
+        const granted = await requestNeededAndroidPermissions({
+          accessFineLocation: {
+            title: 'Location Permission',
+            message: 'Stripe Terminal needs access to your location',
+            buttonPositive: 'Accept',
+          },
+        });
+        if (granted) {
+          console.log('Access granted....')
+        } else {
+          console.error(
+            'Location and BT services are required in order to connect to a reader.'
+          );
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    init();
+  }, [])
 
   if (!loaded) {
     return null;
